@@ -179,10 +179,9 @@ html,body.mobile-demo{height:100%;overflow:hidden;overscroll-behavior:none}.mobi
 .plate-label > * { position: absolute; overflow-wrap: anywhere; line-height: 1.4; }
 .plate-date { top: 24%; left: 10%; width: 35%; }
 .plate-material { top: 24%; right: 8%; width: 40%; }
-.plate-room { top: 46%; left: 12%; width: 29%; }
-.plate-type { top: 46%; right: 10%; width: 43%; }
-.plate-person { display: block; margin-top: 8px; font-weight: 400; font-size: .85em; }
-.plate-operator { top: 68%; left: 18%; width: 64%; }
+.plate-room { top: 40%; left: 8%; width: 17%; }
+.plate-type { top: 40%; left: 28%; width: 38%; font-size: .85em; }
+.plate-person { top: 40%; left: 68%; width: 25%; font-weight: 400; font-size: .85em; }
 .label-guide { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px 30px; padding: 24px; border: 1px solid #d8e4da; border-radius: 12px; background: white; }
 .label-guide h3 { grid-column: 1 / -1; margin: 0; }
 .label-guide li { margin-bottom: 14px; line-height: 1.8; }
@@ -948,9 +947,10 @@ function renderLabelDocument(document) {
     const diagram = processElement('div', 'label-diagram');
     const circle = processElement('div', 'plate-label red-plate');
     circle.append(processElement('span', 'plate-date', '작성 날짜'), processElement('span', 'plate-material', '원재료 NO'), processElement('span', 'plate-room', '#방'));
-    const typeGuide = processElement('strong', 'plate-type', 'BSC / glove / gown');
-    typeGuide.append(processElement('small', 'plate-person', '담당자 이름'));
-    circle.append(typeGuide);
+    circle.append(
+        processElement('span', 'plate-type', 'BSC,glove,gown'),
+        processElement('span', 'plate-person', '담당자 이름')
+    );
     diagram.append(circle);
     const tips = processElement('ul');
     document.content.instructions.forEach(tip => tips.append(processElement('li', '', tip)));
@@ -969,13 +969,15 @@ function renderLabels(form) {
             const card = processElement('article', 'plate-card');
             card.append(processElement('h3', '', (color === 'red' ? '빨강' : '검정') + ' · ' + type));
             const plate = processElement('div', 'plate-label ' + color + '-plate');
-            const typeAndPerson = processElement('strong', 'plate-type', type === 'BSC' ? String(values.get('bsc')) : type);
-            typeAndPerson.append(processElement('small', 'plate-person', '담당자 이름 ' + values.get('operator')));
+            const typeLabel = processElement('span', 'plate-type', type === 'BSC' ? String(values.get('bsc')) : type);
+            const personLabel = processElement('span', 'plate-person', String(values.get('operator')));
+            personLabel.setAttribute('aria-label', '담당자 이름 ' + values.get('operator'));
             plate.append(
                 processElement('span', 'plate-date', date[0].slice(-2) + ',' + date[1] + ',' + date[2]),
                 processElement('span', 'plate-material', String(values.get('material'))),
                 processElement('span', 'plate-room', '#' + values.get('room') + '방'),
-                typeAndPerson
+                typeLabel,
+                personLabel
             );
             card.append(plate);
             target.append(card);
