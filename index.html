@@ -70,6 +70,64 @@ html,body.mobile-demo{height:100%;overflow:hidden;overscroll-behavior:none}.mobi
 #account-button,#logout-button{border:1px solid #d4e1d6;border-radius:8px;padding:9px 12px;background:#fff;color:#176c59;font-size:12px;min-height:40px;cursor:pointer;flex-shrink:0}.mobile-demo header{gap:8px}.presence-banner{display:flex;gap:10px;align-items:center;padding:5px 16px 9px;color:#69816f;font-size:11px;flex-shrink:0;min-height:32px}.presence-banner #connection-label{font-weight:bold;white-space:nowrap}.presence-banner #editing-rooms{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lock-badge{display:block;background:#fff0d2;color:#9b6a11;border-radius:4px;padding:3px 5px;font-size:10px!important;max-width:100%;overflow-wrap:anywhere}.room.being-edited{border-color:#d0a34d!important}.cloud-lock-banner{font-size:12px;padding:10px;background:#eff5ed;border-radius:8px;color:#536c58;line-height:1.7}.account-dialog{border:1px solid #d8e4d9;border-radius:18px;padding:24px;color:#254b37;width:min(430px,94vw);max-height:90dvh;overflow:auto}.account-dialog::backdrop{background:#18382588}.account-dialog h2{font-size:21px}.account-dialog button{cursor:pointer;border:1px solid #d8e4d9;padding:10px;border-radius:8px;background:white;color:#176c59;min-height:42px}.account-dialog form{display:grid;gap:13px}.account-dialog label{display:block;font-size:12px;line-height:1.8}.account-dialog input{display:block;width:100%;font-size:16px;border:1px solid #d8e4d9;padding:11px;border-radius:7px;box-sizing:border-box}.account-dialog #auth-info,.account-dialog #auth-message{font-size:12px;line-height:1.8;color:#708173}.auth-tabs{display:flex;gap:8px;margin:14px 0}.auth-tabs button{flex:1}.cloud-history{list-style:none;padding:0;font-size:12px;max-height:230px;overflow:auto}.cloud-history li{border-top:1px solid #e0e9e0;padding:10px 0}.cloud-history time{display:block;font-size:10px;color:#839686}.cloud-history p{color:#647b6b;font-size:11px;line-height:1.7}button:disabled{cursor:not-allowed;opacity:.5}
 @media(max-width:550px){.mobile-demo .brand small{display:none}.mobile-demo header{padding-inline:10px}.mobile-demo .brand span{font-size:17px}.mobile-demo #demo-reset{display:none}#account-button,#logout-button{font-size:11px;padding:7px 9px}.presence-banner{flex-direction:column;align-items:flex-start;gap:3px}.presence-banner #editing-rooms{max-width:95vw}.mobile-demo.detail-open #sheet-close{bottom:calc(76dvh + 6px)}}
 
+[hidden] { display: none !important; }
+.page-navigation {
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px;
+    border-bottom: 1px solid #d4e1d6;
+    background: #fbfdf9;
+    overflow-x: auto;
+}
+.page-navigation button, .protected-panel button, .protected-panel select {
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid #c8d8cd;
+    border-radius: 8px;
+    color: #245a43;
+    background: white;
+    font: inherit;
+    cursor: pointer;
+}
+.page-navigation button { white-space: nowrap; }
+.page-navigation button[aria-pressed="true"] { background: #176c59; color: white; }
+.mobile-demo main { height: calc(100dvh - 125px); }
+.protected-panel {
+    height: calc(100dvh - 125px);
+    padding: 30px 24px;
+    overflow-y: auto;
+    background: #fbfdf9;
+}
+.protected-panel h1 { margin: 0; font-size: 22px; }
+#process-heading {
+    display: inline-block;
+    border: 3px solid #294f3d;
+    padding: 14px 24px;
+    border-radius: 3px;
+    font-size: 20px;
+    font-weight: 600;
+}
+.process-buttons { display: flex; gap: 28px; margin-top: 32px; flex-wrap: wrap; }
+.process-buttons button { min-width: 145px; border: 2px solid #294f3d; border-radius: 3px; }
+#members-panel { max-width: 1000px; margin: auto; }
+#members-status { color: #587160; }
+.member-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid #dae5dc;
+}
+.member-row > div { flex: 1; min-width: 100px; overflow-wrap: anywhere; }
+.member-row small { display: block; margin-top: 5px; color: #587160; }
+@media(max-width:550px) {
+    .protected-panel { padding: 24px 16px; }
+    .process-buttons { gap: 16px; }
+    .process-buttons button { min-width: 120px; }
+    .member-row { gap: 6px; flex-wrap: wrap; }
+    .member-row button, .member-row select { padding: 8px; font-size: 13px; }
+}
+
 </style></head>
 <body class="mobile-demo" data-demo="true">
 <header><div class="brand">▦ <span>룸노트<small>샘플 체험 · 새로고침하면 초기화</small></span></div><label class="operator-label">작업자 ID<input id="operator" maxlength="40" placeholder="ID" aria-label="Operator ID"></label><button id="demo-reset" class="local" type="button">체험 초기화</button><button id="account-button" type="button">로그인 / 계정 생성</button><button id="logout-button" type="button" hidden>로그아웃</button></header>
@@ -215,5 +273,177 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Cloud.ena
 setInterval(()=>{if(!document.hidden)syncWorkspace();},5000);setInterval(renewLease,20000);setInterval(()=>{if(Cloud.enabled&&draft)syncControls();},1000);setInterval(()=>{if(Cloud.enabled&&Cloud.session&&!Cloud.member?.active)loadMember().catch(()=>{});},15000);
 if(Cloud.enabled){data=fresh();draft=null;render();(async()=>{try{const stored=sessionStorage.getItem(sessionKey);if(stored){const session=JSON.parse(stored);if(session.token)keepSession(session);else sessionStorage.removeItem(sessionKey);}if(Cloud.session)await loadMember();else showAuth();}catch{keepSession(null);Cloud.member=null;showAuth();}updateAccount();})();}
 updateAccount();
+
+</script><script>
+'use strict';
+
+// Role checks in this file control navigation. PostgreSQL checks every protected request.
+const roleNames = {member: '일반', staff: '직원', admin: '관리자'};
+let activePage = 'rooms';
+let roleRefreshRunning = false;
+
+const navigation = document.createElement('nav');
+navigation.className = 'page-navigation';
+navigation.setAttribute('aria-label', '룸노트 메뉴');
+navigation.innerHTML = '<button id="rooms-tab" type="button" aria-pressed="true">방 현황</button>' +
+    '<button id="process-tab" type="button" hidden aria-pressed="false">과정 설명</button>' +
+    '<button id="members-tab" type="button" hidden aria-pressed="false">계정 관리</button>';
+document.querySelector('header').after(navigation);
+
+const processPanel = document.createElement('section');
+processPanel.id = 'process-panel';
+processPanel.className = 'protected-panel';
+processPanel.hidden = true;
+processPanel.setAttribute('aria-labelledby', 'process-heading');
+processPanel.innerHTML = '<h1 id="process-heading">작업 과정</h1>' +
+    '<div class="process-buttons"><button type="button" aria-label="첫 번째 작업 과정">버튼</button>' +
+    '<button type="button" aria-label="두 번째 작업 과정">버튼</button></div>';
+processPanel.querySelectorAll('button').forEach((button, index) => {
+    button.onclick = () => toast('작업 과정 ' + (index + 1) + '의 내용은 준비 중입니다.');
+});
+document.body.append(processPanel);
+
+const membersPanel = document.createElement('section');
+membersPanel.id = 'members-panel';
+membersPanel.className = 'protected-panel';
+membersPanel.hidden = true;
+membersPanel.innerHTML = '<div class="section-title"><h1>계정 관리</h1>' +
+    '<button id="members-refresh" type="button">새로고침</button></div>' +
+    '<p id="members-status" role="status"></p><div id="members-list"></div>';
+document.body.append(membersPanel);
+
+function updatePermissionNavigation() {
+    const role = Cloud.member?.role || 'member';
+    const approved = !!Cloud.session && !!Cloud.member?.active;
+    $('process-tab').hidden = !approved || !['admin', 'staff'].includes(role);
+    $('members-tab').hidden = !approved || role !== 'admin';
+    if ((activePage === 'process' && $('process-tab').hidden) ||
+        (activePage === 'members' && $('members-tab').hidden)) {
+        displayPage('rooms');
+    }
+    if (!approved || role !== 'admin') $('members-list').replaceChildren();
+}
+
+function displayPage(page) {
+    activePage = page;
+    document.querySelector('main').hidden = page !== 'rooms';
+    processPanel.hidden = page !== 'process';
+    membersPanel.hidden = page !== 'members';
+    ['rooms', 'process', 'members'].forEach(name => {
+        $(name + '-tab').setAttribute('aria-pressed', String(page === name));
+    });
+}
+
+async function openProtectedPage(page) {
+    if (Cloud.busy || Cloud.saving) return;
+    if (draft) {
+        if (!confirm('수정중인 내용을 취소하고 이동할까요?')) return;
+        await cancelRoomEdit();
+    }
+    try {
+        // Fetch protected content before showing it, including when a role was just revoked.
+        if (page === 'process') await rpc('process_description');
+        if (page === 'members') await loadMembers();
+        originalClose();
+        displayPage(page);
+    } catch (error) {
+        toast(permissionError(error));
+        await refreshRole();
+    }
+}
+
+function permissionError(error) {
+    if (/ADMIN_REQUIRED|STAFF_REQUIRED/.test(String(error?.message))) {
+        return '이 메뉴를 열 수 있는 권한이 없습니다.';
+    }
+    return cloudError(error);
+}
+
+async function loadMembers() {
+    const result = await rpc('admin_members');
+    $('members-status').textContent = '전체 계정 ' + result.total + '개';
+    const list = $('members-list');
+    list.replaceChildren();
+    result.members.forEach(member => {
+        const row = document.createElement('div');
+        row.className = 'member-row';
+        const label = document.createElement('div');
+        const name = document.createElement('strong');
+        name.textContent = member.display_name || member.username;
+        const id = document.createElement('small');
+        id.textContent = member.username + ' · ' + (member.active ? '사용 가능' : '사용 중지');
+        label.append(name, id);
+        row.append(label);
+        if (member.role === 'admin') {
+            const badge = document.createElement('span');
+            badge.textContent = roleNames.admin;
+            row.append(badge);
+        } else {
+            const select = document.createElement('select');
+            select.setAttribute('aria-label', member.username + ' 권한');
+            ['member', 'staff'].forEach(role => {
+                const option = document.createElement('option');
+                option.value = role;
+                option.textContent = roleNames[role];
+                select.append(option);
+            });
+            select.value = member.role;
+            const save = document.createElement('button');
+            save.type = 'button';
+            save.textContent = '권한 저장';
+            save.onclick = async () => {
+                save.disabled = true;
+                select.disabled = true;
+                try {
+                    await rpc('admin_set_role', {user_id: member.user_id, role: select.value});
+                    toast(member.username + ' 계정의 권한을 저장했습니다.');
+                    await loadMembers();
+                } catch (error) {
+                    toast(permissionError(error));
+                } finally {
+                    save.disabled = false;
+                    select.disabled = false;
+                }
+            };
+            row.append(select, save);
+        }
+        list.append(row);
+    });
+    if (result.total > result.members.length) {
+        $('members-status').textContent += ' · 최근 가입한 ' + result.members.length + '개 표시';
+    }
+}
+
+async function refreshRole() {
+    if (!Cloud.session || roleRefreshRunning) return;
+    roleRefreshRunning = true;
+    try {
+        Cloud.member = await rpc('profile');
+        updateAccount();
+    } catch {
+        // Until the server confirms access again, protected pages are closed.
+        if (Cloud.member) Cloud.member.role = 'member';
+    } finally {
+        updatePermissionNavigation();
+        roleRefreshRunning = false;
+    }
+}
+
+const updateAccountBeforePermissions = updateAccount;
+updateAccount = function () {
+    updateAccountBeforePermissions();
+    updatePermissionNavigation();
+};
+$('rooms-tab').onclick = () => displayPage('rooms');
+$('process-tab').onclick = () => openProtectedPage('process');
+$('members-tab').onclick = () => openProtectedPage('members');
+$('members-refresh').onclick = () => loadMembers().catch(error => toast(permissionError(error)));
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshRole();
+});
+setInterval(() => {
+    if (!document.hidden) refreshRole();
+}, 15000);
+updatePermissionNavigation();
 
 </script><script>document.getElementById('demo-reset').onclick=()=>{if(confirm('체험 내용을 초기화할까요?'))location.reload();};</script></body></html>
