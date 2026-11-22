@@ -340,10 +340,12 @@ async function openProtectedPage(page) {
         if (!confirm('수정중인 내용을 취소하고 이동할까요?')) return;
         await cancelRoomEdit();
     }
+    const session = Cloud.session;
     try {
         // Fetch protected content before showing it, including when a role was just revoked.
         if (page === 'process') await rpc('process_description');
         if (page === 'members') await loadMembers();
+        if (Cloud.session !== session || $(page + '-tab').hidden) return;
         originalClose();
         displayPage(page);
     } catch (error) {
@@ -360,7 +362,9 @@ function permissionError(error) {
 }
 
 async function loadMembers() {
+    const session = Cloud.session;
     const result = await rpc('admin_members');
+    if (Cloud.session !== session || Cloud.member?.role !== 'admin') return;
     $('members-status').textContent = '전체 계정 ' + result.total + '개';
     const list = $('members-list');
     list.replaceChildren();
@@ -417,12 +421,15 @@ async function loadMembers() {
 async function refreshRole() {
     if (!Cloud.session || roleRefreshRunning) return;
     roleRefreshRunning = true;
+    const session = Cloud.session;
     try {
-        Cloud.member = await rpc('profile');
+        const profile = await rpc('profile');
+        if (Cloud.session !== session) return;
+        Cloud.member = profile;
         updateAccount();
     } catch {
         // Until the server confirms access again, protected pages are closed.
-        if (Cloud.member) Cloud.member.role = 'member';
+        if (Cloud.session === session && Cloud.member) Cloud.member.role = 'member';
     } finally {
         updatePermissionNavigation();
         roleRefreshRunning = false;
